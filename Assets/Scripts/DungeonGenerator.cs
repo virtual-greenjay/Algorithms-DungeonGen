@@ -15,54 +15,23 @@ public class DungeonGenerator : MonoBehaviour
 
     RectInt dungeonRoom = new RectInt(0, 0, 100, 60);
 
-    List<RectInt> Rooms = new List<RectInt>(); 
+    List<RectInt> Rooms = new List<RectInt>();
 
-    int step = 0;
+    int ri = 0; //room index
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Rooms.Add(new RectInt(0, 0, dungeonWidth, dungeonHeight));
-        //int i = 0;
-        //do
-        //{
-        //    roomsChanged = false;
-        //    var parentRoom = Rooms[i];
-        //    if (splitVertically)
-        //    {
-        //        if (parentRoom.width >= minRoomLength)
-        //        {
-        //            Rooms.Add(new RectInt(parentRoom.x, parentRoom.y, (parentRoom.width / 2) + 1, parentRoom.height));
-        //            Rooms.Add(new RectInt(parentRoom.x + (parentRoom.width / 2) - 1, parentRoom.y, (parentRoom.width / 2) + 1, parentRoom.height));
-        //            roomsChanged = true;
-        //            splitVertically = false;
-        //            Rooms.RemoveAt(i);
-        //            continue;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        if (parentRoom.height >= minRoomLength)
-        //        {
-        //            Rooms.Add(new RectInt(parentRoom.x, parentRoom.y, parentRoom.width, (parentRoom.height / 2) + 1));
-        //            Rooms.Add(new RectInt(parentRoom.x, parentRoom.y + (parentRoom.height / 2) - 1, parentRoom.width, (parentRoom.height / 2) + 1));
-        //            roomsChanged = true;
-        //            splitVertically = true;
-        //            Rooms.RemoveAt(i);
-        //            continue;
-        //        }
-        //    }
-        //    i++;
-
-        //} while (roomsChanged == true && i < Rooms.Count);
-
-     
 
     }
 
     // Update is called once per frame
     void Update()
     {
+        RectInt tinyRoom = new RectInt(-20, -20, minRoomLength, minRoomLength);
+        AlgorithmsUtils.DebugRectInt(tinyRoom, Color.blue);
+
         AlgorithmsUtils.DebugRectInt(dungeonRoom, Color.blue); 
         for (int i=0; i<Rooms.Count; i++)
         {
@@ -70,9 +39,9 @@ public class DungeonGenerator : MonoBehaviour
             AlgorithmsUtils.DebugRectInt(Rooms[i], roomDepth);
         }
         
-        if(Input.GetKeyUp(KeyCode.R))
+        if(Input.GetKeyUp(KeyCode.Space))
         {
-            SplitRoom();
+            StartCoroutine(GenerateDungeon());
         }
     }
 
@@ -85,8 +54,8 @@ public class DungeonGenerator : MonoBehaviour
         while (splitFurther)
         {
             splitFurther = false;
-            int roomCount = Rooms.Count; //set loop length at current nr of rooms so all rooms only get checked once
-            int ri = 0; //room index
+            int roomCount = Rooms.Count; //set FOR loop length at current nr of rooms so all rooms only get checked once per WHILE loop
+            ri = 0; //reset room index
             for (int i=0; i<roomCount; i++)
             {
                 var parentRoom = Rooms[ri];
@@ -95,31 +64,35 @@ public class DungeonGenerator : MonoBehaviour
 
                 if (splitVertically)
                 {
-                    if (widthCheck)
+                    if (widthCheck) // if wide enough, split vertically
                     {
+                        yield return new WaitForSeconds(0.3f);
                         VerticalSplit(parentRoom);
                         splitFurther = true;
                     } 
-                    else if (heightCheck)
+                    else if (heightCheck) // else if tall enough split horizontally
                     {
+                        yield return new WaitForSeconds(0.3f);
                         HorizontalSplit(parentRoom);
                         splitFurther = true;
                     }
-                    else
+                    else // move on to next room
                     {
                         ri++;
                     }
                     splitVertically = false;
-                } else
+                } else // same as above but vice versa.
                 {
                     if (heightCheck)
                     {
-                        HorizontalSplit();
+                        yield return new WaitForSeconds(0.3f);
+                        HorizontalSplit(parentRoom);
                         splitFurther = true;
                     }
                     else if (widthCheck)
                     {
-                        VerticalSplit();
+                        yield return new WaitForSeconds(0.3f);
+                        VerticalSplit(parentRoom);
                         splitFurther = true;
                     } else
                     {
@@ -131,35 +104,21 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         Debug.Log("Generation complete.");
+
+        //generate doors
+        //find walls: for each room, check which rooms are adjacent by checking if they overlap.
+        //use room coordinates to determine if the adjacent rooms are on the north, east, south or west side. 
+        // generate a door somewhere along the correct edge, exclude the parts near the corners. 
     }
 
 
-    void SplitRoom()
+    void VerticalSplit(RectInt pr)
     {
-        if (step < Rooms.Count)
-        {
-            if (splitVertically) {
-                VerticalSplit();
-            }
-            else
-            {
-                HorizontalSplit();
-            }
-        } else
-        {
-            Debug.Log("Generation complete.");
-        }
-    }
-
-    void VerticalSplit()
-    {
-        var parentRoom = Rooms[step];
-        if (parentRoom.width >= 2*minRoomLength)
-        {
-            int px = parentRoom.x;
-            int py = parentRoom.y;
-            int pw = parentRoom.width;
-            int ph = parentRoom.height;
+      
+            int px = pr.x;
+            int py = pr.y;
+            int pw = pr.width;
+            int ph = pr.height;
             //int halfRD = (int) (pw + 1) / 2; //half-room division
             int aWidth = Random.Range(minRoomLength, pw - minRoomLength + 1);
 
@@ -167,23 +126,16 @@ public class DungeonGenerator : MonoBehaviour
             Rooms.Add(new RectInt(px + aWidth - 1, py, pw-aWidth+1, ph));
             roomsChanged = true;
             
-            Rooms.RemoveAt(step);
-        } else
-        {
-            step++;
-        }
-        //splitVertically = false;
+            Rooms.RemoveAt(ri);
     }
 
-    void HorizontalSplit()
+    void HorizontalSplit(RectInt pr)
     {
-        var parentRoom = Rooms[step];
-        if (parentRoom.height >= 2*minRoomLength)
-        {
-            int px = parentRoom.x;
-            int py = parentRoom.y;
-            int pw = parentRoom.width;
-            int ph = parentRoom.height;
+
+            int px = pr.x;
+            int py = pr.y;
+            int pw = pr.width;
+            int ph = pr.height;
             //int halfRD = (int)(ph + 1) / 2; //half-room division
             int aHeight = Random.Range(minRoomLength, ph - minRoomLength + 1);
 
@@ -191,12 +143,8 @@ public class DungeonGenerator : MonoBehaviour
             Rooms.Add(new RectInt(px, py + aHeight - 1, pw, ph-aHeight +1));
             roomsChanged = true;
             
-            Rooms.RemoveAt(step);
-        } else
-        {
-            step++;
-        }
-        //splitVertically = true;
+            Rooms.RemoveAt(ri);
+
     }
 
 
