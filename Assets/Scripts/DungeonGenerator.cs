@@ -12,10 +12,12 @@ public class DungeonGenerator : MonoBehaviour
     public int minRoomLength = 10;
     public bool splitVertically = true;
     public bool roomsChanged = false;
+    public bool addDoors = true;
 
     RectInt dungeonRoom = new RectInt(0, 0, 100, 60);
 
     List<RectInt> Rooms = new List<RectInt>();
+    List<RectInt> Doors = new List<RectInt>();
 
     int ri = 0; //room index
 
@@ -29,16 +31,24 @@ public class DungeonGenerator : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //draws a minimum size reference room. 
         RectInt tinyRoom = new RectInt(-20, -20, minRoomLength, minRoomLength);
         AlgorithmsUtils.DebugRectInt(tinyRoom, Color.blue);
-
         AlgorithmsUtils.DebugRectInt(dungeonRoom, Color.blue); 
+
+        //draw the generated rooms.
         for (int i=0; i<Rooms.Count; i++)
         {
-            Color roomDepth = new Color(1, i * 0.02f, 0, 1);
-            AlgorithmsUtils.DebugRectInt(Rooms[i], roomDepth);
+            //Color roomDepth = new Color(1, i * 0.02f, 0, 1);
+            //AlgorithmsUtils.DebugRectInt(Rooms[i], roomDepth);
+            AlgorithmsUtils.DebugRectInt(Rooms[i], Color.red);
         }
         
+        foreach (RectInt thisDoor in Doors)
+        {
+            AlgorithmsUtils.DebugRectInt(thisDoor, Color.cyan);
+        }
+
         if(Input.GetKeyUp(KeyCode.Space))
         {
             StartCoroutine(GenerateDungeon());
@@ -103,12 +113,67 @@ public class DungeonGenerator : MonoBehaviour
 
             }
         }
-        Debug.Log("Generation complete.");
+        Debug.Log("Room generation complete.");
 
-        //generate doors
+        if (addDoors)
+        {
+            StartCoroutine(GenerateDungeonDoors());
+        }
+
+        
+    }
+
+    IEnumerator GenerateDungeonDoors()
+    {
+        yield return null;
+        
+
+        for (int i = 0; i<Rooms.Count-1; i++)
+        {
+            for(int j=i+1; j<Rooms.Count; j++)
+            {
+                //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints.
+
+                yield return new WaitForSeconds(0.1f);
+
+                //highlight currently searching rooms
+                AlgorithmsUtils.DebugRectInt(Rooms[i], Color.green);
+                AlgorithmsUtils.DebugRectInt(Rooms[j], Color.yellow);
+
+                if (AlgorithmsUtils.Intersects(Rooms[i], Rooms[j]))
+                {
+                    bool isVertical = false;
+                    RectInt intersectionRoom = AlgorithmsUtils.Intersect(Rooms[i], Rooms[j]);
+                    //checks if overlap is horizontal or vertical
+                    if (intersectionRoom.width == 1) isVertical = true;
+
+                    if (isVertical)
+                    {
+                        int randomOffset = (int)Random.Range(1, intersectionRoom.height - 1);
+                        DoorRect(intersectionRoom.x, intersectionRoom.y + randomOffset);
+                    } else
+                    {
+                        int randomOffset = (int)Random.Range(1, intersectionRoom.width - 1);
+                        DoorRect(intersectionRoom.x + randomOffset, intersectionRoom.y);
+                    }
+
+                }
+            }
+        }
+
+        //pseudocode: generate doors
         //find walls: for each room, check which rooms are adjacent by checking if they overlap.
-        //use room coordinates to determine if the adjacent rooms are on the north, east, south or west side. 
-        // generate a door somewhere along the correct edge, exclude the parts near the corners. 
+        // find if there's already a door connecting these two rooms (no, just check only the rooms AFTER itself in the list, more efficient)
+        //in the intersection, check which side has length 1, then generate a random int in the other direction between x+1, x+length-2
+        // draw door of size 1.1 at the generated position along the side. 
+
+        Debug.Log("Door generation complete.");
+
+    }
+
+    void DoorRect(int doorx, int doory)
+    {
+        Doors.Add(new RectInt(doorx, doory, 1, 1));
     }
 
 
