@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 using System.Collections;
+using NaughtyAttributes;
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -39,16 +40,20 @@ public class DungeonGenerator : MonoBehaviour
         //draw the generated rooms.
         for (int i=0; i<Rooms.Count; i++)
         {
+            // color from red to yellow based on when it was generated
             //Color roomDepth = new Color(1, i * 0.02f, 0, 1);
             //AlgorithmsUtils.DebugRectInt(Rooms[i], roomDepth);
+
             AlgorithmsUtils.DebugRectInt(Rooms[i], Color.red);
         }
         
+        // draw generated doors.
         foreach (RectInt thisDoor in Doors)
         {
             AlgorithmsUtils.DebugRectInt(thisDoor, Color.cyan);
         }
 
+        // not necessary now that I have button, but can also start the process with spacebar.
         if(Input.GetKeyUp(KeyCode.Space))
         {
             StartCoroutine(GenerateDungeon());
@@ -56,6 +61,7 @@ public class DungeonGenerator : MonoBehaviour
     }
 
     //WIP animated Dungeon.
+    [Button]
     IEnumerator GenerateDungeon()
     {
         bool splitFurther = true;
@@ -132,11 +138,11 @@ public class DungeonGenerator : MonoBehaviour
         {
             for(int j=i+1; j<Rooms.Count; j++)
             {
-                //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints.
+                //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints. (solved.)
 
                 yield return new WaitForSeconds(0.1f);
 
-                //highlight currently searching rooms
+                //highlight currently searching rooms (not working right but whatever.)
                 AlgorithmsUtils.DebugRectInt(Rooms[i], Color.green);
                 AlgorithmsUtils.DebugRectInt(Rooms[j], Color.yellow);
 
@@ -217,6 +223,22 @@ public class DungeonGenerator : MonoBehaviour
             roomsChanged = true;
             
             Rooms.RemoveAt(ri);
+
+    }
+
+    [Button]
+    void ResetGeneration()
+    {
+        StopAllCoroutines();
+
+        //empty Rooms array and set it back to initial room. 
+        Rooms = new List<RectInt>();
+        Rooms.Add(new RectInt(0, 0, dungeonWidth, dungeonHeight));
+        //empty Doors array
+        Doors = new List<RectInt>();
+
+        splitVertically = true;
+        roomsChanged = false;
 
     }
 
