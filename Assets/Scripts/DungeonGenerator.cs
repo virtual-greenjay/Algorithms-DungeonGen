@@ -149,12 +149,20 @@ public class DungeonGenerator : MonoBehaviour
 
                     if (isVertical)
                     {
-                        int randomOffset = (int)Random.Range(1, intersectionRoom.height - 1);
-                        DoorRect(intersectionRoom.x, intersectionRoom.y + randomOffset);
+                        // if height of intersection less than 3, skip (to prevent doors on corner intersects)
+                        if (intersectionRoom.height >= 3) 
+                        { 
+                            int randomOffset = (int)Random.Range(1, intersectionRoom.height - 1);
+                            DoorRect(intersectionRoom.x, intersectionRoom.y + randomOffset);
+                        }
                     } else
                     {
-                        int randomOffset = (int)Random.Range(1, intersectionRoom.width - 1);
-                        DoorRect(intersectionRoom.x + randomOffset, intersectionRoom.y);
+                        // if width intersection < 3, skip 
+                        if (intersectionRoom.width >= 3)
+                        {
+                            int randomOffset = (int)Random.Range(1, intersectionRoom.width - 1);
+                            DoorRect(intersectionRoom.x + randomOffset, intersectionRoom.y);
+                        }
                     }
 
                 }
