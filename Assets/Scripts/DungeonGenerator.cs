@@ -14,6 +14,7 @@ public class DungeonGenerator : MonoBehaviour
     public bool splitVertically = true;
     public bool roomsChanged = false;
     public bool addDoors = true;
+    public int dungeonSeed = 20;
 
     RectInt dungeonRoom = new RectInt(0, 0, 100, 60);
 
@@ -60,12 +61,12 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    //WIP animated Dungeon.
+    //Creates the flat outline of the dungeon. Animated.
     [Button]
     IEnumerator GenerateDungeon()
     {
         bool splitFurther = true;
-        yield return null;
+        yield return null; //waits one frame. I don't remember why I did this. 
 
         while (splitFurther)
         {
@@ -131,7 +132,7 @@ public class DungeonGenerator : MonoBehaviour
 
     IEnumerator GenerateDungeonDoors()
     {
-        yield return null;
+        yield return null; //waits one frame. I don't remember why I did this. 
         
 
         for (int i = 0; i<Rooms.Count-1; i++)
@@ -140,7 +141,7 @@ public class DungeonGenerator : MonoBehaviour
             {
                 //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints. (solved.)
 
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.05f);
 
                 //highlight currently searching rooms (not working right but whatever.)
                 AlgorithmsUtils.DebugRectInt(Rooms[i], Color.green);
@@ -241,6 +242,8 @@ public class DungeonGenerator : MonoBehaviour
         roomsChanged = false;
 
     }
+
+
 
 
 
