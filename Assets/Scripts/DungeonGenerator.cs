@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.UIElements;
 using System.Collections;
 using NaughtyAttributes;
+using UnityEditor;
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -16,7 +17,7 @@ public class DungeonGenerator : MonoBehaviour
     public bool addDoors = true;
     public int dungeonSeed = 20;
 
-    RectInt dungeonRoom = new RectInt(0, 0, 100, 60);
+    RectInt dungeonRoom; 
 
     List<RectInt> Rooms = new List<RectInt>();
     List<RectInt> Doors = new List<RectInt>();
@@ -26,6 +27,7 @@ public class DungeonGenerator : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        dungeonRoom = new RectInt(0, 0, dungeonWidth, dungeonHeight);
         Rooms.Add(new RectInt(0, 0, dungeonWidth, dungeonHeight));
 
     }
@@ -241,6 +243,21 @@ public class DungeonGenerator : MonoBehaviour
         splitVertically = true;
         roomsChanged = false;
 
+    }
+
+    public RectInt GetDungeonBounds()
+    {
+        return dungeonRoom;
+    }
+
+    public List<RectInt> GetRooms()
+    {
+        return Rooms;
+    }
+
+    public List<RectInt> GetDoors()
+    {
+        return Doors;
     }
 
 
