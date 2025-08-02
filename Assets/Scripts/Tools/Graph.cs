@@ -74,22 +74,18 @@ public class Graph<T>
                 }
             }
 
-
-
-            //first v. less elegant. should be equal but keep in case v2 doesn't work
-            //for (int i = 0; i < adjacencyList[currentNode].Count; i++)
-            //{
-            //    if (!discovered.Contains(adjacencyList[currentNode][i]))
-            //    {
-            //        Q.Enqueue(adjacencyList[currentNode][i]);
-            //        discovered.Add(adjacencyList[currentNode][i]);
-            //    }
-            //}
-
         }
         //compare list of discovered and keys in Adjacency list. 
+        if (discovered.Count == adjacencyList.Count)
+        {
+            Debug.Log("All Nodes Visited.");
+        } else
+        {
+            Debug.Log("Graph is discontinuous.");
+        }
 
     }
+
 
     public void DFS(T startingNode)
     {
@@ -117,5 +113,12 @@ public class Graph<T>
             }
         }
         //compare list of discovered and keys in Adjacency list. 
+        if (discovered.Count == adjacencyList.Count)
+        {
+            Debug.Log("All Nodes Visited.");
+        } else
+        {
+            Debug.Log("Graph is discontinuous.");
+        }
     }
 }
