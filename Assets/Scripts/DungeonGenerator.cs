@@ -5,9 +5,17 @@ using UnityEngine.UIElements;
 using System.Collections;
 using NaughtyAttributes;
 using UnityEditor;
+using Unity.AI.Navigation;
+using UnityEngine.Events;
 
 public class DungeonGenerator : MonoBehaviour
 {
+
+    [SerializeField]
+    private NavMeshSurface navMeshSurface;
+
+    [SerializeField]
+    private UnityEvent dungeonGen;
 
     public int dungeonWidth = 100;
     public int dungeonHeight = 60;
@@ -38,7 +46,8 @@ public class DungeonGenerator : MonoBehaviour
         //draws a minimum size reference room. 
         RectInt tinyRoom = new RectInt(-20, -20, minRoomLength, minRoomLength);
         AlgorithmsUtils.DebugRectInt(tinyRoom, Color.blue);
-        AlgorithmsUtils.DebugRectInt(dungeonRoom, Color.blue); 
+        //draws dungeon bounds.
+        AlgorithmsUtils.DebugRectInt(dungeonRoom, Color.blue);
 
         //draw the generated rooms.
         for (int i=0; i<Rooms.Count; i++)
@@ -143,7 +152,7 @@ public class DungeonGenerator : MonoBehaviour
             {
                 //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints. (solved.)
 
-                yield return new WaitForSeconds(0.05f);
+                
 
                 //highlight currently searching rooms (not working right but whatever.)
                 AlgorithmsUtils.DebugRectInt(Rooms[i], Color.green);
@@ -163,6 +172,7 @@ public class DungeonGenerator : MonoBehaviour
                         { 
                             int randomOffset = (int)Random.Range(1, intersectionRoom.height - 1);
                             DoorRect(intersectionRoom.x, intersectionRoom.y + randomOffset);
+                            yield return new WaitForSeconds(0.05f);
                         }
                     } else
                     {
@@ -171,6 +181,7 @@ public class DungeonGenerator : MonoBehaviour
                         {
                             int randomOffset = (int)Random.Range(1, intersectionRoom.width - 1);
                             DoorRect(intersectionRoom.x + randomOffset, intersectionRoom.y);
+                            yield return new WaitForSeconds(0.05f);
                         }
                     }
 
@@ -185,7 +196,14 @@ public class DungeonGenerator : MonoBehaviour
         // draw door of size 1.1 at the generated position along the side. 
 
         Debug.Log("Door generation complete.");
+        dungeonGen.Invoke();
 
+    }
+
+    [Button]
+    public void BakeNavMesh()
+    {
+        navMeshSurface.BuildNavMesh();
     }
 
     void DoorRect(int doorx, int doory)

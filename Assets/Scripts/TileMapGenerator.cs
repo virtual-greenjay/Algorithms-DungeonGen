@@ -72,6 +72,8 @@ public class TileMapGenerator : MonoBehaviour
 
         _tileMap = tileMap;
 
+        Debug.Log("Tilemap generated.");
+
         onGenerateTileMap.Invoke();
     }
 

@@ -22,10 +22,12 @@ public class MarchingSquareSpawner : MonoBehaviour
 
     //to do: make this an IEnumerator/Coroutine, get it animated
     [Button]
-    void GenerateWalls()
+    public void GenerateWalls()
     {
         int[,] _tileMap = tileMapGenerator.GetTileMap();
         _wallTilesMap = new int[_tileMap.GetLength(0), _tileMap.GetLength(1)];
+
+        GameObject parentGameObject = new GameObject("Walls");
 
 
         for (int i = 0; i < _tileMap.GetLength(0) - 1; i++)
@@ -49,7 +51,8 @@ public class MarchingSquareSpawner : MonoBehaviour
                 else
                 {
                     //spawn a tile at position y = i+0.5, x = j+0.5. 
-                    Instantiate(wallTiles[_case], new Vector3(j + 1, 0, i + 1), Quaternion.identity);
+                    var newWall = Instantiate(wallTiles[_case], new Vector3(j + 1, 0, i + 1), Quaternion.identity, parentGameObject.transform);
+                    newWall.name = $"Wall_{j}_{i}";
                 }
                 _wallTilesMap[i, j] = _case;
             }

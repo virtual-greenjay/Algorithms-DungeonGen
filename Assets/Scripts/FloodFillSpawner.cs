@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class FloodFillSpawner : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class FloodFillSpawner : MonoBehaviour
     TileMapGenerator tileMapGenerator;
     [SerializeField]
     DungeonGenerator dungeonGenerator;
+    [SerializeField]
+    UnityEvent floorFilled;
 
     public GameObject floorTile;
     void Start()
@@ -28,6 +31,7 @@ public class FloodFillSpawner : MonoBehaviour
         int start_y = _rooms[0].x + _rooms[0].width / 2;
 
         var startingNode = (start_x, start_y);
+        GameObject parentGameObject = new GameObject("Floors");
 
         //Uses Queue, FIFO method
         Queue<(int x, int y)> Q = new Queue<(int x, int y)>();
@@ -49,8 +53,8 @@ public class FloodFillSpawner : MonoBehaviour
                 int current_y = currentNode.y;
 
                 // spawn in the floor tile asset
-                Instantiate(floorTile, new Vector3(current_y + 0.5f, 0, current_x + 0.5f), Quaternion.identity);
-
+                var newFloor = Instantiate(floorTile, new Vector3(current_y + 0.5f, 0, current_x + 0.5f), Quaternion.identity, parentGameObject.transform);
+                newFloor.name = $"Floor_{current_y}_{current_x}";
 
                 //add adjacent coordinates to queue
                 (int x, int y)[] directions = new (int x, int y)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
@@ -72,5 +76,7 @@ public class FloodFillSpawner : MonoBehaviour
 
 
         }
+
+        floorFilled.Invoke();
     }
 }
