@@ -1,5 +1,6 @@
 using NaughtyAttributes;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -21,9 +22,15 @@ public class FloodFillSpawner : MonoBehaviour
         dungeonGenerator = GetComponent<DungeonGenerator>();
     }
 
-    [Button]
-    public void BFSFloorFill()
+    public void startFloorGen()
     {
+        StartCoroutine(BFSFloorFill());
+    }
+
+    [Button]
+    public IEnumerator BFSFloorFill()
+    {
+        yield return null;
         List<RectInt> _rooms = dungeonGenerator.GetRooms();
         int[,] _tileMap = tileMapGenerator.GetTileMap();
 
@@ -55,6 +62,8 @@ public class FloodFillSpawner : MonoBehaviour
                 // spawn in the floor tile asset
                 var newFloor = Instantiate(floorTile, new Vector3(current_y + 0.5f, 0, current_x + 0.5f), Quaternion.identity, parentGameObject.transform);
                 newFloor.name = $"Floor_{current_y}_{current_x}";
+
+                yield return null;
 
                 //add adjacent coordinates to queue
                 (int x, int y)[] directions = new (int x, int y)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };

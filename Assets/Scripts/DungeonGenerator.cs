@@ -20,12 +20,11 @@ public class DungeonGenerator : MonoBehaviour
     public int dungeonWidth = 100;
     public int dungeonHeight = 60;
     public int minRoomLength = 10;
-    public bool splitVertically = true;
     public bool roomsChanged = false;
     public bool addDoors = true;
     public int dungeonSeed = 20;
 
-    RectInt dungeonRoom; 
+    RectInt dungeonRoom;
 
     List<RectInt> Rooms = new List<RectInt>();
     List<RectInt> Doors = new List<RectInt>();
@@ -50,7 +49,7 @@ public class DungeonGenerator : MonoBehaviour
         AlgorithmsUtils.DebugRectInt(dungeonRoom, Color.blue);
 
         //draw the generated rooms.
-        for (int i=0; i<Rooms.Count; i++)
+        for (int i = 0; i < Rooms.Count; i++)
         {
             // color from red to yellow based on when it was generated
             //Color roomDepth = new Color(1, i * 0.02f, 0, 1);
@@ -58,7 +57,7 @@ public class DungeonGenerator : MonoBehaviour
 
             AlgorithmsUtils.DebugRectInt(Rooms[i], Color.red);
         }
-        
+
         // draw generated doors.
         foreach (RectInt thisDoor in Doors)
         {
@@ -66,7 +65,7 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         // not necessary now that I have button, but can also start the process with spacebar.
-        if(Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space))
         {
             StartCoroutine(GenerateDungeon());
         }
@@ -84,50 +83,46 @@ public class DungeonGenerator : MonoBehaviour
             splitFurther = false;
             int roomCount = Rooms.Count; //set FOR loop length at current nr of rooms so all rooms only get checked once per WHILE loop
             ri = 0; //reset room index
-            for (int i=0; i<roomCount; i++)
+            for (int i = 0; i < roomCount; i++)
             {
                 var parentRoom = Rooms[ri];
                 bool widthCheck = parentRoom.width >= 2 * minRoomLength;
                 bool heightCheck = parentRoom.height >= 2 * minRoomLength;
 
-                if (splitVertically)
+
+                if (widthCheck && !heightCheck) // if wide enough, split vertically
                 {
-                    if (widthCheck) // if wide enough, split vertically
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                        VerticalSplit(parentRoom);
-                        splitFurther = true;
-                    } 
-                    else if (heightCheck) // else if tall enough split horizontally
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                        HorizontalSplit(parentRoom);
-                        splitFurther = true;
-                    }
-                    else // move on to next room
-                    {
-                        ri++;
-                    }
-                    splitVertically = false;
-                } else // same as above but vice versa.
-                {
-                    if (heightCheck)
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                        HorizontalSplit(parentRoom);
-                        splitFurther = true;
-                    }
-                    else if (widthCheck)
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                        VerticalSplit(parentRoom);
-                        splitFurther = true;
-                    } else
-                    {
-                        ri++;
-                    }
-                    splitVertically = true;
+                    yield return new WaitForSeconds(0.3f);
+                    VerticalSplit(parentRoom);
+                    splitFurther = true;
                 }
+                else if (heightCheck && !widthCheck) // else if tall enough split horizontally
+                {
+                    yield return new WaitForSeconds(0.3f);
+                    HorizontalSplit(parentRoom);
+                    splitFurther = true;
+                }
+                else if (heightCheck && widthCheck)
+                {
+                    if (Random.value >= 0.5f)
+                    {
+                        yield return new WaitForSeconds(0.3f);
+                        VerticalSplit(parentRoom);
+                        splitFurther = true;
+                    }
+                    else
+                    {
+                        yield return new WaitForSeconds(0.3f);
+                        HorizontalSplit(parentRoom);
+                        splitFurther = true;
+                    }
+                }
+                else // move on to next room
+                {
+                    ri++;
+                }
+                
+
 
             }
         }
@@ -138,21 +133,21 @@ public class DungeonGenerator : MonoBehaviour
             StartCoroutine(GenerateDungeonDoors());
         }
 
-        
+
     }
 
     IEnumerator GenerateDungeonDoors()
     {
         yield return null; //waits one frame. I don't remember why I did this. 
-        
 
-        for (int i = 0; i<Rooms.Count-1; i++)
+
+        for (int i = 0; i < Rooms.Count - 1; i++)
         {
-            for(int j=i+1; j<Rooms.Count; j++)
+            for (int j = i + 1; j < Rooms.Count; j++)
             {
                 //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints. (solved.)
 
-                
+
 
                 //highlight currently searching rooms (not working right but whatever.)
                 AlgorithmsUtils.DebugRectInt(Rooms[i], Color.green);
@@ -168,13 +163,14 @@ public class DungeonGenerator : MonoBehaviour
                     if (isVertical)
                     {
                         // if height of intersection less than 3, skip (to prevent doors on corner intersects)
-                        if (intersectionRoom.height >= 3) 
-                        { 
+                        if (intersectionRoom.height >= 3)
+                        {
                             int randomOffset = (int)Random.Range(1, intersectionRoom.height - 1);
                             DoorRect(intersectionRoom.x, intersectionRoom.y + randomOffset);
                             yield return new WaitForSeconds(0.05f);
                         }
-                    } else
+                    }
+                    else
                     {
                         // if width intersection < 3, skip 
                         if (intersectionRoom.width >= 3)
@@ -214,36 +210,36 @@ public class DungeonGenerator : MonoBehaviour
 
     void VerticalSplit(RectInt pr)
     {
-      
-            int px = pr.x;
-            int py = pr.y;
-            int pw = pr.width;
-            int ph = pr.height;
-            //int halfRD = (int) (pw + 1) / 2; //half-room division
-            int aWidth = Random.Range(minRoomLength, pw - minRoomLength + 1);
 
-            Rooms.Add(new RectInt(px, py, aWidth, ph));
-            Rooms.Add(new RectInt(px + aWidth - 1, py, pw-aWidth+1, ph));
-            roomsChanged = true;
-            
-            Rooms.RemoveAt(ri);
+        int px = pr.x;
+        int py = pr.y;
+        int pw = pr.width;
+        int ph = pr.height;
+        //int halfRD = (int) (pw + 1) / 2; //half-room division
+        int aWidth = Random.Range(minRoomLength, pw - minRoomLength + 1);
+
+        Rooms.Add(new RectInt(px, py, aWidth, ph));
+        Rooms.Add(new RectInt(px + aWidth - 1, py, pw - aWidth + 1, ph));
+        roomsChanged = true;
+
+        Rooms.RemoveAt(ri);
     }
 
     void HorizontalSplit(RectInt pr)
     {
 
-            int px = pr.x;
-            int py = pr.y;
-            int pw = pr.width;
-            int ph = pr.height;
-            //int halfRD = (int)(ph + 1) / 2; //half-room division
-            int aHeight = Random.Range(minRoomLength, ph - minRoomLength + 1);
+        int px = pr.x;
+        int py = pr.y;
+        int pw = pr.width;
+        int ph = pr.height;
+        //int halfRD = (int)(ph + 1) / 2; //half-room division
+        int aHeight = Random.Range(minRoomLength, ph - minRoomLength + 1);
 
-            Rooms.Add(new RectInt(px, py, pw, aHeight));
-            Rooms.Add(new RectInt(px, py + aHeight - 1, pw, ph-aHeight +1));
-            roomsChanged = true;
-            
-            Rooms.RemoveAt(ri);
+        Rooms.Add(new RectInt(px, py, pw, aHeight));
+        Rooms.Add(new RectInt(px, py + aHeight - 1, pw, ph - aHeight + 1));
+        roomsChanged = true;
+
+        Rooms.RemoveAt(ri);
 
     }
 
@@ -257,8 +253,6 @@ public class DungeonGenerator : MonoBehaviour
         Rooms.Add(new RectInt(0, 0, dungeonWidth, dungeonHeight));
         //empty Doors array
         Doors = new List<RectInt>();
-
-        splitVertically = true;
         roomsChanged = false;
 
     }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using NaughtyAttributes;
@@ -20,10 +21,17 @@ public class MarchingSquareSpawner : MonoBehaviour
         tileMapGenerator = GetComponent<TileMapGenerator>();
     }
 
+    public void startWallGen()
+    {
+        StartCoroutine(GenerateWalls());
+    }
+
     //to do: make this an IEnumerator/Coroutine, get it animated
     [Button]
-    public void GenerateWalls()
+    public IEnumerator GenerateWalls()
     {
+        yield return null;
+
         int[,] _tileMap = tileMapGenerator.GetTileMap();
         _wallTilesMap = new int[_tileMap.GetLength(0), _tileMap.GetLength(1)];
 
@@ -53,6 +61,8 @@ public class MarchingSquareSpawner : MonoBehaviour
                     //spawn a tile at position y = i+0.5, x = j+0.5. 
                     var newWall = Instantiate(wallTiles[_case], new Vector3(j + 1, 0, i + 1), Quaternion.identity, parentGameObject.transform);
                     newWall.name = $"Wall_{j}_{i}";
+
+                    yield return new WaitForSeconds(0.02f);
                 }
                 _wallTilesMap[i, j] = _case;
             }
