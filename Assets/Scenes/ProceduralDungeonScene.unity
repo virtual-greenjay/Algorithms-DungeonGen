@@ -458,7 +458,6 @@ MonoBehaviour:
   dungeonWidth: 100
   dungeonHeight: 60
   minRoomLength: 10
-  splitVertically: 1
   roomsChanged: 0
   addDoors: 1
   dungeonSeed: 20
@@ -494,7 +493,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 545594013}
         m_TargetAssemblyTypeName: MarchingSquareSpawner, Assembly-CSharp
-        m_MethodName: GenerateWalls
+        m_MethodName: startWallGen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -506,7 +505,7 @@ MonoBehaviour:
         m_CallState: 2
       - m_Target: {fileID: 545594015}
         m_TargetAssemblyTypeName: FloodFillSpawner, Assembly-CSharp
-        m_MethodName: BFSFloorFill
+        m_MethodName: startFloorGen
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
