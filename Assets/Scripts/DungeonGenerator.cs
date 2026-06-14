@@ -64,6 +64,8 @@ public class DungeonGenerator : MonoBehaviour
             AlgorithmsUtils.DebugRectInt(thisDoor, Color.cyan);
         }
 
+        //here: draw "active" (highlighted) rooms. 
+
         // not necessary now that I have button, but can also start the process with spacebar.
         if (Input.GetKeyUp(KeyCode.Space))
         {
@@ -76,7 +78,7 @@ public class DungeonGenerator : MonoBehaviour
     IEnumerator GenerateDungeon()
     {
         bool splitFurther = true;
-        yield return null; //waits one frame. I don't remember why I did this. 
+        yield return null; //waits one frame. I don't remember why I did this. (solved. ienumerators throw an error when they contain no yield statements.)
 
         while (splitFurther)
         {
@@ -102,7 +104,7 @@ public class DungeonGenerator : MonoBehaviour
                     HorizontalSplit(parentRoom);
                     splitFurther = true;
                 }
-                else if (heightCheck && widthCheck)
+                else if (heightCheck && widthCheck) //if both, randomly choose which way to split
                 {
                     if (Random.value >= 0.5f)
                     {
@@ -117,7 +119,7 @@ public class DungeonGenerator : MonoBehaviour
                         splitFurther = true;
                     }
                 }
-                else // move on to next room
+                else // if neither, move on to next room
                 {
                     ri++;
                 }
@@ -127,6 +129,8 @@ public class DungeonGenerator : MonoBehaviour
             }
         }
         Debug.Log("Room generation complete.");
+
+        //this is where code goes for removing rooms. 
 
         if (addDoors)
         {
@@ -138,18 +142,13 @@ public class DungeonGenerator : MonoBehaviour
 
     IEnumerator GenerateDungeonDoors()
     {
-        yield return null; //waits one frame. I don't remember why I did this. 
-
 
         for (int i = 0; i < Rooms.Count - 1; i++)
         {
             for (int j = i + 1; j < Rooms.Count; j++)
             {
-                //not working correctly yet; current code will generate doors in corners. test with steps and breakpoints. (solved.)
 
-
-
-                //highlight currently searching rooms (not working right but whatever.)
+                //highlight currently searching rooms (not working right but whatever.) (to do: push to DebugDrawingBatcher and call in Update).
                 AlgorithmsUtils.DebugRectInt(Rooms[i], Color.green);
                 AlgorithmsUtils.DebugRectInt(Rooms[j], Color.yellow);
 
@@ -184,12 +183,6 @@ public class DungeonGenerator : MonoBehaviour
                 }
             }
         }
-
-        //pseudocode: generate doors
-        //find walls: for each room, check which rooms are adjacent by checking if they overlap.
-        // find if there's already a door connecting these two rooms (no, just check only the rooms AFTER itself in the list, more efficient)
-        //in the intersection, check which side has length 1, then generate a random int in the other direction between x+1, x+length-2
-        // draw door of size 1.1 at the generated position along the side. 
 
         Debug.Log("Door generation complete.");
         dungeonGen.Invoke();
@@ -254,6 +247,8 @@ public class DungeonGenerator : MonoBehaviour
         //empty Doors array
         Doors = new List<RectInt>();
         roomsChanged = false;
+
+        //should also clean up walls/floors/navmesh. 
 
     }
 

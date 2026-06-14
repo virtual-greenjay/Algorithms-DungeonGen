@@ -37,6 +37,8 @@ public class MarchingSquareSpawner : MonoBehaviour
 
         GameObject parentGameObject = new GameObject("Walls");
 
+        int multiplexer = 0;
+
 
         for (int i = 0; i < _tileMap.GetLength(0) - 1; i++)
         {
@@ -55,6 +57,7 @@ public class MarchingSquareSpawner : MonoBehaviour
                 else if (_case < 0 || _case == 5 || _case == 10 || _case > 14)
                 {
                     Debug.Log("Error: Case equals " + _case + ".");
+                    //case 5 and 10 are touching corners, which should not occur. 
                 }
                 else
                 {
@@ -62,7 +65,7 @@ public class MarchingSquareSpawner : MonoBehaviour
                     var newWall = Instantiate(wallTiles[_case], new Vector3(j + 1, 0, i + 1), Quaternion.identity, parentGameObject.transform);
                     newWall.name = $"Wall_{j}_{i}";
 
-                    yield return new WaitForSeconds(0.02f);
+                    if (multiplexer++ % 4 == 0) yield return null;
                 }
                 _wallTilesMap[i, j] = _case;
             }
@@ -78,6 +81,7 @@ public class MarchingSquareSpawner : MonoBehaviour
 
         var sb = new StringBuilder();
 
+        //ternary conditional operator - if false, prints table as is (upside down), if true, flips the table to print right side up.
         int start = flip ? rows - 1 : 0;
         int end = flip ? -1 : rows;
         int step = flip ? -1 : 1;

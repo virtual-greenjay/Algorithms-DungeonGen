@@ -86,6 +86,7 @@ public class TileMapGenerator : MonoBehaviour
 
         var sb = new StringBuilder();
 
+        //ternary conditional operator - if false, prints table as is (upside down), if true, flips the table to print right side up.
         int start = flip ? rows - 1 : 0;
         int end = flip ? -1 : rows;
         int step = flip ? -1 : 1;

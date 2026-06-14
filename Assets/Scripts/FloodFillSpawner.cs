@@ -49,6 +49,11 @@ public class FloodFillSpawner : MonoBehaviour
         Q.Enqueue(startingNode);
         discovered.Add(startingNode);
 
+        int multiplexer = 0;
+
+        //directions for adjacent nodes (right, left, down, up)
+        (int x, int y)[] directions = new (int x, int y)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
+
         while (Q.Count > 0)
         {
             var currentNode = Q.Dequeue();
@@ -63,11 +68,9 @@ public class FloodFillSpawner : MonoBehaviour
                 var newFloor = Instantiate(floorTile, new Vector3(current_y + 0.5f, 0, current_x + 0.5f), Quaternion.identity, parentGameObject.transform);
                 newFloor.name = $"Floor_{current_y}_{current_x}";
 
-                yield return null;
+                if (multiplexer++ % 10 == 0) yield return null;
 
                 //add adjacent coordinates to queue
-                (int x, int y)[] directions = new (int x, int y)[] { (1, 0), (-1, 0), (0, 1), (0, -1) };
-
                 foreach ((int dx, int dy) in directions)
                 {
 
