@@ -21,15 +21,19 @@ public class DungeonGenerator : MonoBehaviour
     public int dungeonHeight = 60;
     public int minRoomLength = 10;
     public bool roomsChanged = false;
-    public bool addDoors = true;
+
     public int dungeonSeed = 20;
+    public bool useDungeonSeed = true;
+
+    public bool isGenerating = false;
+    public bool isPaused = false;
+
+    private Random.State stateBeforeGen;
 
     RectInt dungeonRoom;
 
     List<RectInt> Rooms = new List<RectInt>();
     List<RectInt> Doors = new List<RectInt>();
-
-    int ri = 0; //room index
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -67,75 +71,136 @@ public class DungeonGenerator : MonoBehaviour
         //here: draw "active" (highlighted) rooms. 
 
         // not necessary now that I have button, but can also start the process with spacebar.
-        if (Input.GetKeyUp(KeyCode.Space))
+        if (Input.GetKeyUp(KeyCode.Space) && !isGenerating)
         {
             StartCoroutine(GenerateDungeon());
+            isGenerating = true;
         }
+    }
+
+    [Button]
+    IEnumerator CreateRandomSequence()
+    {
+        //for seed testing. 
+        if (useDungeonSeed)
+        {
+            Random.InitState(dungeonSeed);
+        }
+
+        int counter = 10;
+        while (counter > 0)
+        {
+            Random.InitState(dungeonSeed);
+            int randomNumber = Random.Range(0, 100);
+            Debug.Log("Random number: " + randomNumber);
+            randomNumber = Random.Range(0, 100);
+            Debug.Log("Random number: " + randomNumber);
+            counter--;
+
+            yield return null;
+        }
+
+        
+
+        
     }
 
     //Creates the flat outline of the dungeon. Animated.
     [Button]
     IEnumerator GenerateDungeon()
     {
-        bool splitFurther = true;
-        yield return null; //waits one frame. I don't remember why I did this. (solved. ienumerators throw an error when they contain no yield statements.)
-
-        while (splitFurther)
+        if (useDungeonSeed)
         {
-            splitFurther = false;
-            int roomCount = Rooms.Count; //set FOR loop length at current nr of rooms so all rooms only get checked once per WHILE loop
-            ri = 0; //reset room index
-            for (int i = 0; i < roomCount; i++)
+            //WHY IT NO WORK
+            Random.InitState(dungeonSeed);
+            
+        }
+
+        Queue<RectInt> roomQueue = new Queue<RectInt>(Rooms); //create a queue and add all rooms to it. 
+
+        while (roomQueue.Count > 0)
+        {
+            RectInt currentRoom = roomQueue.Dequeue();
+
+            bool widthCheck = currentRoom.width >= 2 * minRoomLength;
+            bool heightCheck = currentRoom.height >= 2 * minRoomLength;
+
+            if (!widthCheck && !heightCheck)
             {
-                var parentRoom = Rooms[ri];
-                bool widthCheck = parentRoom.width >= 2 * minRoomLength;
-                bool heightCheck = parentRoom.height >= 2 * minRoomLength;
+                continue; // if room is too small to split, skip it and go to next room in queue
+            }
+            
+            yield return new WaitForSeconds(0.3f); // wait for a short time to create an animation effect
 
+            //set up variables for room splitting. 
+            int px = currentRoom.x;
+            int py = currentRoom.y;
+            int pw = currentRoom.width;
+            int ph = currentRoom.height;
 
-                if (widthCheck && !heightCheck) // if wide enough, split vertically
-                {
-                    yield return new WaitForSeconds(0.3f);
-                    VerticalSplit(parentRoom);
-                    splitFurther = true;
-                }
-                else if (heightCheck && !widthCheck) // else if tall enough split horizontally
-                {
-                    yield return new WaitForSeconds(0.3f);
-                    HorizontalSplit(parentRoom);
-                    splitFurther = true;
-                }
-                else if (heightCheck && widthCheck) //if both, randomly choose which way to split
-                {
-                    if (Random.value >= 0.5f)
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                        VerticalSplit(parentRoom);
-                        splitFurther = true;
-                    }
-                    else
-                    {
-                        yield return new WaitForSeconds(0.3f);
-                        HorizontalSplit(parentRoom);
-                        splitFurther = true;
-                    }
-                }
-                else // if neither, move on to next room
-                {
-                    ri++;
-                }
-                
+            bool splitVertically = false;
+            if (widthCheck && !heightCheck) // if wide enough, split vertically
+            {
+                splitVertically = true;
+            }
+            else if (heightCheck && !widthCheck) // else if tall enough split horizontally
+            {
+                splitVertically = false;
+            }
+            else if (heightCheck && widthCheck) //if both, randomly choose which way to split
+            {
 
+                float r = Random.value;
+                //Debug.Log(r);
+                if (r >= 0.5f)
+                {
+                    splitVertically = true;
+                }
+                else
+                {
+                    splitVertically = false;
+                }
+            }
+
+            RectInt childA;
+            RectInt childB;
+
+            if (splitVertically)
+            {
+                int aWidth = Random.Range(minRoomLength, pw - minRoomLength + 1);
+
+                childA = new RectInt(px, py, aWidth, ph);
+                childB = new RectInt(px + aWidth - 1, py, pw - aWidth + 1, ph);
 
             }
+            else
+            {
+                int aHeight = Random.Range(minRoomLength, ph - minRoomLength + 1);
+
+                childA = new RectInt(px, py, pw, aHeight);
+                childB = new RectInt(px, py + aHeight - 1, pw, ph - aHeight + 1);
+                
+            }
+
+            // add child rooms to queue for further splitting
+            roomQueue.Enqueue(childA);
+            roomQueue.Enqueue(childB);
+
+            // replace current room with child rooms in Rooms list
+            int index = Rooms.IndexOf(currentRoom);
+            Rooms.RemoveAt(index);
+            Rooms.Add(childA);
+            Rooms.Add(childB);
+
         }
+
         Debug.Log("Room generation complete.");
 
         //this is where code goes for removing rooms. 
 
-        if (addDoors)
-        {
-            StartCoroutine(GenerateDungeonDoors());
-        }
+  
+        StartCoroutine(GenerateDungeonDoors());
+
 
 
     }
@@ -201,40 +266,7 @@ public class DungeonGenerator : MonoBehaviour
     }
 
 
-    void VerticalSplit(RectInt pr)
-    {
-
-        int px = pr.x;
-        int py = pr.y;
-        int pw = pr.width;
-        int ph = pr.height;
-        //int halfRD = (int) (pw + 1) / 2; //half-room division
-        int aWidth = Random.Range(minRoomLength, pw - minRoomLength + 1);
-
-        Rooms.Add(new RectInt(px, py, aWidth, ph));
-        Rooms.Add(new RectInt(px + aWidth - 1, py, pw - aWidth + 1, ph));
-        roomsChanged = true;
-
-        Rooms.RemoveAt(ri);
-    }
-
-    void HorizontalSplit(RectInt pr)
-    {
-
-        int px = pr.x;
-        int py = pr.y;
-        int pw = pr.width;
-        int ph = pr.height;
-        //int halfRD = (int)(ph + 1) / 2; //half-room division
-        int aHeight = Random.Range(minRoomLength, ph - minRoomLength + 1);
-
-        Rooms.Add(new RectInt(px, py, pw, aHeight));
-        Rooms.Add(new RectInt(px, py + aHeight - 1, pw, ph - aHeight + 1));
-        roomsChanged = true;
-
-        Rooms.RemoveAt(ri);
-
-    }
+    
 
     [Button]
     void ResetGeneration()
