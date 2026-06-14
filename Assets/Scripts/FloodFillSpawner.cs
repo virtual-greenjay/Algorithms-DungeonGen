@@ -68,7 +68,7 @@ public class FloodFillSpawner : MonoBehaviour
                 var newFloor = Instantiate(floorTile, new Vector3(current_y + 0.5f, 0, current_x + 0.5f), Quaternion.identity, parentGameObject.transform);
                 newFloor.name = $"Floor_{current_y}_{current_x}";
 
-                if (multiplexer++ % 10 == 0) yield return null;
+                if (multiplexer++ % 10 == 0 && dungeonGenerator.isAnimated) yield return null;
 
                 //add adjacent coordinates to queue
                 foreach ((int dx, int dy) in directions)

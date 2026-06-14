@@ -26,7 +26,9 @@ public class DungeonGenerator : MonoBehaviour
     public bool useDungeonSeed = true;
 
     public bool isGenerating = false;
-    public bool isPaused = false;
+    public bool isPaused = false; // to add: pause functionality.
+
+    public bool isAnimated = true; // to add: toggle for animation on/off.
 
     private Random.State stateBeforeGen;
 
@@ -55,9 +57,6 @@ public class DungeonGenerator : MonoBehaviour
         //draw the generated rooms.
         for (int i = 0; i < Rooms.Count; i++)
         {
-            // color from red to yellow based on when it was generated
-            //Color roomDepth = new Color(1, i * 0.02f, 0, 1);
-            //AlgorithmsUtils.DebugRectInt(Rooms[i], roomDepth);
 
             AlgorithmsUtils.DebugRectInt(Rooms[i], Color.red);
         }
@@ -74,7 +73,6 @@ public class DungeonGenerator : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space) && !isGenerating)
         {
             StartCoroutine(GenerateDungeon());
-            isGenerating = true;
         }
     }
 
@@ -99,9 +97,6 @@ public class DungeonGenerator : MonoBehaviour
 
             yield return null;
         }
-
-        
-
         
     }
 
@@ -109,6 +104,8 @@ public class DungeonGenerator : MonoBehaviour
     [Button]
     IEnumerator GenerateDungeon()
     {
+        isGenerating = true;
+
         if (useDungeonSeed)
         {
             //WHY IT NO WORK
@@ -130,7 +127,8 @@ public class DungeonGenerator : MonoBehaviour
                 continue; // if room is too small to split, skip it and go to next room in queue
             }
             
-            yield return new WaitForSeconds(0.3f); // wait for a short time to create an animation effect
+            if (isAnimated)
+                yield return new WaitForSeconds(0.3f); // wait for a short time to create an animation effect
 
             //set up variables for room splitting. 
             int px = currentRoom.x;
@@ -231,7 +229,8 @@ public class DungeonGenerator : MonoBehaviour
                         {
                             int randomOffset = (int)Random.Range(1, intersectionRoom.height - 1);
                             DoorRect(intersectionRoom.x, intersectionRoom.y + randomOffset);
-                            yield return new WaitForSeconds(0.05f);
+                            if (isAnimated) 
+                                yield return new WaitForSeconds(0.05f);
                         }
                     }
                     else
@@ -241,7 +240,8 @@ public class DungeonGenerator : MonoBehaviour
                         {
                             int randomOffset = (int)Random.Range(1, intersectionRoom.width - 1);
                             DoorRect(intersectionRoom.x + randomOffset, intersectionRoom.y);
-                            yield return new WaitForSeconds(0.05f);
+                            if (isAnimated) 
+                                yield return new WaitForSeconds(0.05f);
                         }
                     }
 
@@ -258,6 +258,9 @@ public class DungeonGenerator : MonoBehaviour
     public void BakeNavMesh()
     {
         navMeshSurface.BuildNavMesh();
+
+        Debug.Log("NavMesh baked. Generation complete.");
+        isGenerating = false;
     }
 
     void DoorRect(int doorx, int doory)
@@ -272,15 +275,22 @@ public class DungeonGenerator : MonoBehaviour
     void ResetGeneration()
     {
         StopAllCoroutines();
+        isGenerating = false;
 
         //empty Rooms array and set it back to initial room. 
         Rooms = new List<RectInt>();
         Rooms.Add(new RectInt(0, 0, dungeonWidth, dungeonHeight));
         //empty Doors array
         Doors = new List<RectInt>();
-        roomsChanged = false;
 
         //should also clean up walls/floors/navmesh. 
+
+        GameObject walls = GameObject.Find("Walls");
+        GameObject floor = GameObject.Find("Floors");
+
+        Destroy(walls);
+        Destroy(floor);
+        navMeshSurface.RemoveData();
 
     }
 

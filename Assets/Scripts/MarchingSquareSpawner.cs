@@ -12,6 +12,8 @@ public class MarchingSquareSpawner : MonoBehaviour
 {
     [SerializeField]
     TileMapGenerator tileMapGenerator;
+    [SerializeField]
+    DungeonGenerator dungeonGenerator;
 
     public GameObject[] wallTiles;
     private int[,] _wallTilesMap;
@@ -19,6 +21,7 @@ public class MarchingSquareSpawner : MonoBehaviour
     void Start()
     {
         tileMapGenerator = GetComponent<TileMapGenerator>();
+        dungeonGenerator = GetComponent<DungeonGenerator>();
     }
 
     public void startWallGen()
@@ -65,7 +68,8 @@ public class MarchingSquareSpawner : MonoBehaviour
                     var newWall = Instantiate(wallTiles[_case], new Vector3(j + 1, 0, i + 1), Quaternion.identity, parentGameObject.transform);
                     newWall.name = $"Wall_{j}_{i}";
 
-                    if (multiplexer++ % 4 == 0) yield return null;
+                    if (multiplexer++ % 4 == 0 && dungeonGenerator.isAnimated) yield return null;
+
                 }
                 _wallTilesMap[i, j] = _case;
             }
