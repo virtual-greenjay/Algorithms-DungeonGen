@@ -108,7 +108,7 @@ public class DungeonGenerator : MonoBehaviour
 
         if (useDungeonSeed)
         {
-            //WHY IT NO WORK
+            //only works when animations are turned off. For some reason. >:(
             Random.InitState(dungeonSeed);
             
         }
@@ -149,7 +149,6 @@ public class DungeonGenerator : MonoBehaviour
             {
 
                 float r = Random.value;
-                //Debug.Log(r);
                 if (r >= 0.5f)
                 {
                     splitVertically = true;

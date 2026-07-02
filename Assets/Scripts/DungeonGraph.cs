@@ -44,6 +44,7 @@ public class DungeonGraph : MonoBehaviour
     void drawDungeonGraph()
     {
         //problem for later. Idk how to do this (and it's apparently not required? check that)
+        //start at first node in graph (always a room). draw edges to all adjacent nodes (doors). add room+doors to visited. 
     }
 
     [Button]

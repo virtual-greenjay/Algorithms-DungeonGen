@@ -26,7 +26,7 @@ public class TileMapGenerator : MonoBehaviour
     [Button]
     public void GenerateTileMap()
     {
-        //to add: empty out arrays, remove all existing wall objects. 
+        //to add: empty out arrays, remove all existing wall objects. (is done in DungeonGenerator)
 
         int[,] tileMap = new int[dungeonGenerator.GetDungeonBounds().height, dungeonGenerator.GetDungeonBounds().width];
         int rows = tileMap.GetLength(0);

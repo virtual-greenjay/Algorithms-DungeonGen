@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class Graph<T>
 {
-    private Dictionary<T, List<T>> adjacencyList;
+    private Dictionary<T, HashSet<T>> adjacencyList;
     public Graph() { 
-        adjacencyList = new Dictionary<T, List<T>>(); 
+        adjacencyList = new Dictionary<T, HashSet<T>>(); 
     }
     public void AddNode(T node) { 
         if (!adjacencyList.ContainsKey(node))
         {
-            adjacencyList[node] = new List<T>();
+            adjacencyList[node] = new HashSet<T>();
         } else
         {
             Debug.Log("Node already exists.");
@@ -27,7 +27,7 @@ public class Graph<T>
         adjacencyList[fromNode].Add(toNode);
         adjacencyList[toNode].Add(fromNode); // two way connection!
     }
-    public List<T> GetNeighbors(T node)
+    public HashSet<T> GetNeighbors(T node)
     {
         if (!adjacencyList.ContainsKey(node))
         {
@@ -38,7 +38,7 @@ public class Graph<T>
 
     public void PrintGraph()
     {
-        foreach (KeyValuePair<T,List<T>> node in adjacencyList)
+        foreach (KeyValuePair<T,HashSet<T>> node in adjacencyList)
         {
             string adjacents = "";
             foreach (T adj in node.Value) {
@@ -50,7 +50,7 @@ public class Graph<T>
         }
     }
 
-    public void BFS(T startingNode)
+    public void BFS(T startingNode) //T? is a nullable type / optional parameter (but doesn't work here?)
     {
         //Uses Queue, FIFO method
         Queue<T> Q = new Queue<T>();

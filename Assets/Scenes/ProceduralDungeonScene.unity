@@ -459,8 +459,11 @@ MonoBehaviour:
   dungeonHeight: 60
   minRoomLength: 10
   roomsChanged: 0
-  addDoors: 1
   dungeonSeed: 20
+  useDungeonSeed: 1
+  isGenerating: 0
+  isPaused: 0
+  isAnimated: 0
 --- !u!4 &545594011
 Transform:
   m_ObjectHideFlags: 0
@@ -529,6 +532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileMapGenerator: {fileID: 0}
+  dungeonGenerator: {fileID: 0}
   wallTiles:
   - {fileID: 0}
   - {fileID: 5967930082345930632, guid: a9b3b91ceb6f1134ca74cce01b6a78a8, type: 3}
